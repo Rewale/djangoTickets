@@ -1,6 +1,7 @@
 from django.db import models
 
 # Create your models here.
+#TODO: Переименовать все модели в единственное число
 
 
 class AirCompany(models.Model):
@@ -23,6 +24,7 @@ class Airports(models.Model):
     name = models.CharField(max_length=50, blank=True, null=True)
 
 
+# TODO: удалить количество билетов или обновлять их по мере добавления в админке
 class Flight(models.Model):
     Flight_ID = models.CharField(max_length=6, primary_key=True)
     DateFrom = models.DateTimeField()
@@ -50,7 +52,7 @@ class Tickets(models.Model):
 
     Seq = models.IntegerField(primary_key=True)
     FlightOfTicket = models.ForeignKey(to=Flight, on_delete=models.CASCADE, related_name='flight')
-    Cost = models.IntegerField()
+    Cost = models.IntegerField(verbose_name="Цена")
     Seat = models.CharField(max_length=5)
     Customer = models.ForeignKey(to=Customers, on_delete=models.CASCADE)
 
