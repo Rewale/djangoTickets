@@ -1,24 +1,62 @@
+from typing import Optional, Any
+
 from django.contrib import admin
+from django.db.models import Field
+
+from django.http import HttpRequest
+from django.urls import resolve
+
 from . import models
 
-#TODO:адекватное и красивое отображение всех моделей https://developer.mozilla.org/ru/docs/Learn/Server-side/Django/Admin_site
-class TicketsInstanceInline(admin.TabularInline):
-    model = models.Tickets
 
-#TODO:добавление нового билета к рейсу
+# TODO:адекватное и красивое отображение всех моделей
+#  https://developer.mozilla.org/ru/docs/Learn/Server-side/Django/Admin_site
+class TicketsInstanceInline(admin.TabularInline):
+    """Билеты"""
+    model = models.Ticket
+    extra = 1
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        seq_value_default = 1
+        if db_field.name == 'Seq':
+            try:
+                resolved = resolve(request.path_info)
+                print(resolved)
+                if resolved.kwargs:
+
+                    seq_value_default = self.parent_model.objects.get(pk=resolved.kwargs['object_id']).tickets.count()+1
+            except:
+                print("АШиПКА!!!")
+                # seq_value_default = 1
+            kwargs['initial'] = seq_value_default
+            print(seq_value_default)
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+
 @admin.register(models.Flight)
-class BookAdmin(admin.ModelAdmin):
+class FlightAdmin(admin.ModelAdmin):
     list_display = ('Flight_ID', 'DateFrom', 'DateTo', 'airTo', 'airFrom')
+    # fields = ['Flight_ID', ('DateFrom', 'DateTo'), ('airTo', 'airFrom')]
+
+    fieldsets = (
+        (None, {
+            'fields': ('Flight_ID', 'Company')
+        }),
+        ('Время', {
+            'fields': ('DateFrom', 'DateTo')
+        }),
+        ('Место вылета/Прилета', {
+            'fields': ['airTo', 'airFrom']
+        })
+    )
+
     inlines = [TicketsInstanceInline]
 
+
 # admin.site.register(models.Tickets)
-# admin.site.register(models.Customers)
+admin.site.register(models.Customer)
 # admin.site.register(models.Flight)
-# admin.site.register(models.AirCompany)
-# admin.site.register(models.Airports)
-# admin.site.register(models.Town)
-# admin.site.register(models.Country)
-
-
-
-
+admin.site.register(models.AirCompany)
+admin.site.register(models.Airport)
+admin.site.register(models.Town)
+admin.site.register(models.Country)
