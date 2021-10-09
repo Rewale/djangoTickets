@@ -23,14 +23,22 @@ class TicketsInstanceInline(admin.TabularInline):
                 resolved = resolve(request.path_info)
                 print(resolved)
                 if resolved.kwargs:
+                    print(resolved.kwargs)
+                    seq_value_default = self.parent_model.objects.get(pk=resolved.kwargs['object_id']).tickets.last().Seq + 1
 
-                    seq_value_default = self.parent_model.objects.get(pk=resolved.kwargs['object_id']).tickets.count()+1
             except:
                 print("АШиПКА!!!")
                 # seq_value_default = 1
             kwargs['initial'] = seq_value_default
             print(seq_value_default)
+
         return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        print(kwargs)
+        #if db_field.name == "Customer":
+            #kwargs["initial"] = request.
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 @admin.register(models.Flight)
