@@ -1,6 +1,7 @@
 from datetime import datetime, date, time, timedelta
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db import models
 from django.contrib.auth.models import User
@@ -88,22 +89,31 @@ class Passenger(models.Model):
     """Пассажир"""
     # passportSeries = models.CharField(max_length=4, primary_key=True, verbose_name="Серия паспорта")
     # passportNum = models.CharField(max_length=6, verbose_name="Номер паспорта")
-    document = models.CharField(max_length=25, primary_key=True)
+    document = models.CharField(max_length=25, primary_key=True, verbose_name="Документ")
     birthDate = models.DateField(verbose_name="День рождения")
     citizenship = models.ForeignKey(to=Country, related_name="citizens", on_delete=models.CASCADE)
-    FIO = models.CharField(max_length=100)
+    FIO = models.CharField(max_length=100, verbose_name="ФИО")
 
     def get_age(self):
-        start_date = datetime.today()
+        start_date = date.today()
         end_date = self.birthDate
-        difference = end_date - start_date
+        difference = start_date - end_date
         difference_in_years = (difference.days + difference.seconds / 86400) / 365.2425
         print(difference_in_years)
         return difference_in_years
 
+    # TODO: более точную валидацию
+    def clean(self) -> None:
+        if self.get_age() < 14:
+            if len(self.document) != 12:
+                raise ValidationError("Введите номер и серию свидетельства о рождении")
+        elif self.get_age() >= 14:
+            if len(self.document) != 6:
+                raise ValidationError("Введите номер паспорта")
+
 
 # Кастомный юзер
-# TODO: foreing key mismatch ticket - customer
+
 class Customer(models.Model):
     """Покупатель"""
 
@@ -155,11 +165,13 @@ class Ticket(models.Model):
     Cost = models.IntegerField(verbose_name="Цена")
     Seat = models.CharField(max_length=5, verbose_name="Место")
 
-    Passenger = models.ForeignKey(to=Passenger, on_delete=models.CASCADE, verbose_name="Пассажир",
+    Passenger = models.ForeignKey(to=Passenger, on_delete=models.CASCADE, verbose_name="Пассажир", blank=True,
+                                  null=True,
                                   default=None)
-    Customer = models.ForeignKey(to=Customer, on_delete=models.CASCADE, verbose_name="Покупатель", default=None, null=True)
-
-
+    Customer = models.ForeignKey(to=Customer, blank=True,  on_delete=models.CASCADE, verbose_name="Покупатель",
+                                 null=True,
+                                 default=None,
+                                 related_name='tickets_buy')
 
     def __str__(self):
         return f'{self.FlightOfTicket}:{self.Seat}'

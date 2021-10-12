@@ -1,6 +1,7 @@
 from typing import Optional, Any
 
 from django.contrib import admin
+from django.core.exceptions import ValidationError
 from django.db.models import Field
 
 from django.http import HttpRequest
@@ -61,6 +62,18 @@ class FlightAdmin(admin.ModelAdmin):
     inlines = [TicketsInstanceInline]
 
 
+@admin.register(models.Passenger)
+class PassengerAdmin(admin.ModelAdmin):
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields["document"].help_text = "Паспорт - для взрослых, свидетельство о рождении - для лиц младше 14"
+        return form
+
+
+
+
+
 # admin.site.register(models.Tickets)
 admin.site.register(models.Customer)
 # admin.site.register(models.Flight)
@@ -68,4 +81,4 @@ admin.site.register(models.AirCompany)
 admin.site.register(models.Airport)
 admin.site.register(models.Town)
 admin.site.register(models.Country)
-admin.site.register(models.Passenger)
+#admin.site.register(models.Passenger)
