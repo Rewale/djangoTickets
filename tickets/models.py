@@ -106,10 +106,10 @@ class Passenger(models.Model):
     def clean(self) -> None:
         if self.get_age() < 14:
             if len(self.document) != 12:
-                raise ValidationError("Введите номер и серию свидетельства о рождении")
+                raise ValidationError("Введите действительный номер и серию свидетельства о рождении")
         elif self.get_age() >= 14:
             if len(self.document) != 6:
-                raise ValidationError("Введите номер паспорта")
+                raise ValidationError("Введите действительный номер и серию паспорта")
 
 
 # Кастомный юзер

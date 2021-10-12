@@ -71,14 +71,10 @@ class PassengerAdmin(admin.ModelAdmin):
         return form
 
 
-
-
-
-# admin.site.register(models.Tickets)
+# По умолчанию и нормально
 admin.site.register(models.Customer)
-# admin.site.register(models.Flight)
 admin.site.register(models.AirCompany)
 admin.site.register(models.Airport)
 admin.site.register(models.Town)
 admin.site.register(models.Country)
-#admin.site.register(models.Passenger)
+
