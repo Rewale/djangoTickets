@@ -1,5 +1,7 @@
+from django.http import JsonResponse
 from django.shortcuts import render
 from rest_framework import generics, permissions
+from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from . import models as models_app
@@ -46,3 +48,30 @@ class FlightListView(generics.ListAPIView):
         flights = models_app.Flight.objects.annotate(count_tickets=models.Count('tickets'))
 
         return flights
+
+
+class UsersTickets(generics.ListAPIView):
+    serializer_class = TicketSerializer
+    # permission_classes =
+
+    # Todo: после авторизации выводить купленные билеты текущего пользователя
+    def get_queryset(self):
+        customer = models_app.Customer.objects.first()
+        tickets = models_app.Ticket.objects.filter(Customer=customer)
+
+        return tickets
+
+
+@api_view(('GET',))
+# @renderer_classes((TemplateHTMLRenderer, JSONRenderer))
+def buy_ticket(request, flight_num, seq):
+
+    ticket = models_app.Ticket.objects.get(FlightOfTicket=flight_num, Seq=seq)
+
+    if ticket.Customer is not None:
+        return Response(data='Response=Neok,error=Билет уже куплен')
+
+    ticket.Customer = models_app.Customer.objects.first()
+    ticket.save()
+
+    return Response(data="ok")
