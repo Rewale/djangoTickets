@@ -111,13 +111,21 @@ class Passenger(models.Model):
             if len(self.document) != 6:
                 raise ValidationError("Введите действительный номер и серию паспорта")
 
+    class Meta:
+        # unique_together = (('passportSeries', 'passportNum'),)
+        verbose_name = 'Пассажир'
+        verbose_name_plural = 'Пассажиры'
+
+    def __str__(self):
+        return f'{self.FIO}:{self.document}'
+
 
 # Кастомный юзер
 
 class Customer(models.Model):
     """Покупатель"""
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name='customer')
     passenger = models.OneToOneField(Passenger, on_delete=models.PROTECT, blank=True, default=None)
     Miles = models.FloatField(default=0)
 

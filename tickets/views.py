@@ -10,6 +10,7 @@ from django.db import models
 from .serializers import TicketSerializer, FlightSerializer
 
 
+# TODO: АВТОРИЗАЦИЯ/РЕГИСТРАЦИЯ
 class TicketsListView(generics.ListAPIView):
     """Вывод списка билетов"""
     serializer_class = TicketSerializer
@@ -51,12 +52,14 @@ class FlightListView(generics.ListAPIView):
 
 
 class UsersTickets(generics.ListAPIView):
+    """Список билетов купленных пользователем"""
     serializer_class = TicketSerializer
     # permission_classes =
 
-    # Todo: после авторизации выводить купленные билеты текущего пользователя
     def get_queryset(self):
-        customer = models_app.Customer.objects.first()
+        customer = models_app.Customer.objects.filter(user=self.request.user.pk).first()
+        print(customer)
+
         tickets = models_app.Ticket.objects.filter(Customer=customer)
 
         return tickets
